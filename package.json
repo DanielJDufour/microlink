@@ -1,0 +1,42 @@
+{
+  "name": "microlink",
+  "version": "0.0.0",
+  "description": "Comlink Alternative. Built with JSON-RPC.",
+  "main": "index.js",
+  "type": "module",
+  "files": [
+    "call.js",
+    "deserialize.js",
+    "expose.js",
+    "index.js",
+    "serialize.js",
+    "wrap.js"
+  ],
+  "scripts": {
+    "format": "npx prettier --arrow-parens=avoid --trailing-comma=none --write *.js",
+    "serve": "npx srvd --debug",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielJDufour/microlink.git"
+  },
+  "keywords": [
+    "comlink",
+    "jsonrpc",
+    "message",
+    "rpc",
+    "threads",
+    "web",
+    "worker"
+  ],
+  "author": "Daniel J. Dufour",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/DanielJDufour/microlink/issues"
+  },
+  "homepage": "https://github.com/DanielJDufour/microlink#readme",
+  "devDependencies": {
+    "flug": "^2.6.0"
+  }
+}
