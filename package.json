@@ -1,6 +1,6 @@
 {
   "name": "microlink",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Comlink Alternative. Built with JSON-RPC.",
   "main": "index.js",
   "type": "module",
