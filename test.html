@@ -18,11 +18,11 @@
             if (exp === undefined) throw Error("exp is undefined");
             return Math.pow(base, exp);
           }
-        });
+        }, { debug_level: 0 });
       `;
       const worker_string = "data:text/javascript;base64," + btoa(worker_script);
       const worker = new Worker(worker_string, { type: "module" });
-      const lnk = await wrap(worker);
+      const lnk = await wrap(worker, { debug_level: 0 });
 
       test("basic", async ({ eq }) => {
         const response = await new Promise((resolve) => {

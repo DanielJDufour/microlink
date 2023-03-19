@@ -12,9 +12,7 @@ export default function serialize(things, prefix = "func:") {
     if (Array.isArray(it)) {
       return it.map(i => stringify(i));
     } else if (typeof it === "object") {
-      return Object.fromEntries(
-        Object.entries(it).map(([k, v]) => [k, stringify(v)])
-      );
+      return Object.fromEntries(Object.entries(it).map(([k, v]) => [k, stringify(v)]));
     } else if (typeof it === "function") {
       const fid = Math.random();
       funcs[fid] = it;

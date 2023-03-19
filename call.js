@@ -1,12 +1,12 @@
 import serialize from "./serialize.js";
 
-export default function call(it, method, params) {
+export default function call(it, method, params, { debug_level = 0 } = {}) {
   if (!params) params = [];
 
-  let [params_serialized, params_functions] = serialize(
-    params,
-    "microlink.call:"
-  );
+  let [params_serialized, params_functions] = serialize(params, "microlink.call:");
+  if (debug_level >= 2) {
+    console.log("[Microlink.call] serialized to ", [params_serialized, params_functions]);
+  }
 
   return new Promise(resolve => {
     const id = Math.random();
@@ -16,7 +16,9 @@ export default function call(it, method, params) {
 
       if (data.method && params_functions && data.method in params_functions) {
         const result = await params_functions[data.method](...data.params);
-        it.postMessage({ jsonrpc: "2.0", result, id: data.id });
+        const msg = { jsonrpc: "2.0", result, id: data.id };
+        if (debug_level >= 2) console.log("[Microlink.call] top thread posting message", msg);
+        return it.postMessage(msg);
       }
 
       if (data.id === id) {
@@ -26,10 +28,12 @@ export default function call(it, method, params) {
         // even if promise is used later
         params_functions = null;
 
-        resolve(data.result);
+        return resolve(data.result);
       }
     });
 
-    it.postMessage({ jsonrpc: "2.0", id, method, params: params_serialized });
+    const msg = { jsonrpc: "2.0", id, method, params: params_serialized };
+    if (debug_level >= 2) console.log("[Microlink.call] top thread posting message", msg);
+    return it.postMessage(msg);
   });
 }

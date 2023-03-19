@@ -13,7 +13,7 @@
     "wrap.js"
   ],
   "scripts": {
-    "format": "npx prettier --arrow-parens=avoid --trailing-comma=none --write *.js",
+    "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --write *.js",
     "serve": "npx srvd --debug",
     "test": "node test.js"
   },

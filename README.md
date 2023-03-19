@@ -31,3 +31,13 @@ await obj.halve(10);
 const count_elements = selector => document.querySelectorAll(selector).length;
 await obj.run(count_elements, 'div');
 ```
+
+## advanced usage
+#### debugging
+```js
+// pass an options object to expose or wrap
+const options = { debug_level: 10 };
+
+expose(methods, options);
+wrap(worker, options)
+```
