@@ -2,9 +2,10 @@
 > Comlink Alternative
 
 ## features
-- easily pass function to another thread
+- easily pass functions to worker threads
 - built with [JSON-RPC 2.0](https://www.jsonrpc.org/specification)
 - zero run-time dependencies
+- batching
 
 ## usage
 #### inside worker.js
@@ -33,6 +34,17 @@ await obj.run(count_elements, 'div');
 ```
 
 ## advanced usage
+#### batching
+```js
+import { expose } from "microlink";
+
+expose(methods, {
+  batch_size: 10, // how many requests per batch should be sent up to the main thread
+  batch_wait: 100, // wait up to 100ms for batch to be filled before sent
+})
+```
+
+
 #### debugging
 ```js
 // pass an options object to expose or wrap

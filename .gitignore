@@ -106,3 +106,5 @@ dist
 # other files
 *bak*
 pnpm-lock.yaml
+cjs
+dist

@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <script src="https://unpkg.com/flug"></script>
+    <script src="http://localhost:8080/dist/microlink.bundle.js"></script>
+  </head>
+  <body>
+    <script type="module">
+      const { expose, wrap } = microlink;
+
+      const worker_script = "http://localhost:8080/test/test.worker.js";
+      // const worker_string = "data:text/javascript;base64," + btoa(worker_script);
+      // const worker = new Worker(worker_string, { type: "module" });
+      const worker = new Worker(worker_script, { type: "module" });
+      console.log("worker:", worker);
+      const lnk = await wrap(worker, { debug_level: 10 });
+      console.log("lnk::", lnk);
+
+      test("basic", async ({ eq }) => {
+        const response = await new Promise(resolve => {
+          worker.onmessage = evt => resolve(evt.data);
+          worker.postMessage({
+            jsonrpc: "2.0",
+            id: 1234,
+            method: "pow",
+            params: [2, 3]
+          });
+        });
+        eq(response, { jsonrpc: "2.0", result: 8, id: 1234 });
+      });
+
+      test("not found", async ({ eq }) => {
+        const response = await new Promise(resolve => {
+          worker.onmessage = evt => resolve(evt.data);
+          worker.postMessage({
+            jsonrpc: "2.0",
+            id: 1234,
+            method: "UNKNOWN_METHOD_NAME"
+          });
+        });
+        eq(response, { jsonrpc: "2.0", error: { code: -32601, message: "Method not found" }, id: 1234 });
+      });
+
+      test("error", async ({ eq }) => {
+        const response = await new Promise(resolve => {
+          worker.onmessage = evt => resolve(evt.data);
+          worker.postMessage({
+            jsonrpc: "2.0",
+            id: 1234,
+            method: "pow",
+            params: [2, undefined]
+          });
+        });
+        eq(response, { jsonrpc: "2.0", error: { code: -32603, message: "Internal error" }, id: 1234 });
+      });
+
+      test("list", async ({ eq }) => {
+        const response = await new Promise(resolve => {
+          worker.onmessage = evt => resolve(evt.data);
+          worker.postMessage({
+            jsonrpc: "2.0",
+            id: 1234,
+            method: "microlink.list"
+          });
+        });
+        eq(response, { jsonrpc: "2.0", result: ["run", "math", "pow"], id: 1234 });
+      });
+
+      test("wrap", async ({ eq }) => {
+        eq(Object.keys(lnk).sort(), ["math", "pow", "run"]);
+        eq(await lnk.pow(2, 4), 16);
+        eq(await lnk.math("sqrt", 4), 2);
+      });
+
+      test("passing in function", async ({ eq }) => {
+        const response = await lnk.run(() => 987654321);
+        eq(response, 987654321);
+      });
+    </script>
+  </body>
+</html>

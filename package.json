@@ -2,20 +2,29 @@
   "name": "microlink",
   "version": "0.0.2",
   "description": "Comlink Alternative. Built with JSON-RPC.",
-  "main": "index.js",
-  "type": "module",
+  "unpkg": "./dist/microlink.bundle.js",
+  "jsdelivr": "./dist/microlink.bundle.js",
+  "exports": {
+    ".": {
+      "require": "./cjs/index.js",
+      "import": "./esm/index.js"
+    }
+  },
   "files": [
-    "call.js",
-    "deserialize.js",
-    "expose.js",
-    "index.js",
-    "serialize.js",
-    "wrap.js"
+    "cjs",
+    "esm",
+    "dist"
   ],
   "scripts": {
-    "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --write *.js",
+    "build": "npm run build:cjs && npm run build:bundle",
+    "build:bundle": "mkdir -p ./dist && npx browserify ./cjs/index.js > ./dist/microlink.bundle.js",
+    "build:cjs": "npx babel --plugins @babel/plugin-transform-modules-commonjs --plugins @babel/plugin-proposal-export-namespace-from ./esm/* --out-dir ./cjs",
+    "clean": "rm -rf ./cjs/* ./dist/*",
+    "format": "npx prettier --arrow-parens=avoid --print-width=200 --trailing-comma=none --write esm test",
     "serve": "npx srvd --debug",
-    "test": "node test.js"
+    "test": "npm run test:js && npm run test:build",
+    "test:js": "node -r esm ./test/test.js",
+    "test:build": "npm run build && node -r ./cjs/index.js -e '' && node -r ./dist/microlink.bundle.js -e ''"
   },
   "repository": {
     "type": "git",
@@ -37,6 +46,11 @@
   },
   "homepage": "https://github.com/DanielJDufour/microlink#readme",
   "devDependencies": {
-    "flug": "^2.6.0"
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+    "@babel/plugin-transform-modules-commonjs": "^7.22.5",
+    "flug": "^2.6.0",
+    "mock-worker": "^0.0.1"
   }
 }
