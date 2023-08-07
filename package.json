@@ -8,7 +8,15 @@
     ".": {
       "require": "./cjs/index.js",
       "import": "./esm/index.js"
-    }
+    },
+    "./cjs": "./cjs/index.js",
+    "./cjs/index.js": "./cjs/index.js",
+    "./cjs/expose.js": "./cjs/expose.js",
+    "./cjs/wrap.js": "./cjs/wrap.js",
+    "./esm": "./esm/index.js",
+    "./esm/index.js": "./esm/index.js",
+    "./esm/expose.js": "./esm/expose.js",
+    "./esm/wrap.js": "./esm/wrap.js"
   },
   "files": [
     "cjs",
@@ -18,10 +26,10 @@
   "scripts": {
     "build": "npm run build:cjs && npm run build:bundle",
     "build:bundle": "mkdir -p ./dist && npx browserify ./cjs/index.js > ./dist/microlink.bundle.js",
-    "build:cjs": "npx babel --plugins @babel/plugin-transform-modules-commonjs --plugins @babel/plugin-proposal-export-namespace-from ./esm/* --out-dir ./cjs",
+    "build:cjs": "babel --plugins @babel/plugin-transform-modules-commonjs --plugins @babel/plugin-proposal-export-namespace-from ./esm/* --out-dir ./cjs",
     "clean": "rm -rf ./cjs/* ./dist/*",
-    "format": "npx prettier --arrow-parens=avoid --print-width=200 --trailing-comma=none --write esm test",
-    "serve": "npx srvd --debug",
+    "format": "npx prettier@latest --arrow-parens=avoid --print-width=200 --trailing-comma=none --write esm test",
+    "serve": "npx srvd@latest --debug",
     "test": "npm run test:js && npm run test:build",
     "test:js": "node -r esm ./test/test.js",
     "test:build": "npm run build && node -r ./cjs/index.js -e '' && node -r ./dist/microlink.bundle.js -e ''"
