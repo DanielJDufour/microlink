@@ -26,7 +26,7 @@
   "scripts": {
     "build": "npm run build:cjs && npm run build:bundle",
     "build:bundle": "mkdir -p ./dist && npx browserify ./cjs/index.js > ./dist/microlink.bundle.js",
-    "build:cjs": "babel --plugins @babel/plugin-transform-modules-commonjs --plugins @babel/plugin-proposal-export-namespace-from ./esm/* --out-dir ./cjs",
+    "build:cjs": "babel --plugins @babel/plugin-transform-modules-commonjs --plugins @babel/plugin-transform-export-namespace-from ./esm/* --out-dir ./cjs",
     "clean": "rm -rf ./cjs/* ./dist/*",
     "format": "npx prettier@latest --arrow-parens=avoid --print-width=200 --trailing-comma=none --write esm test",
     "serve": "npx srvd@latest --debug",
@@ -54,10 +54,10 @@
   },
   "homepage": "https://github.com/DanielJDufour/microlink#readme",
   "devDependencies": {
-    "@babel/cli": "^7.22.9",
-    "@babel/core": "^7.22.9",
-    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
-    "@babel/plugin-transform-modules-commonjs": "^7.22.5",
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.5",
+    "@babel/plugin-transform-export-namespace-from": "^7.23.4",
+    "@babel/plugin-transform-modules-commonjs": "^7.23.3",
     "flug": "^2.6.0",
     "mock-worker": "^0.0.1"
   }
