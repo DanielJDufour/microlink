@@ -8,7 +8,7 @@ export default function call(it, method, params, { debug_level = 0 } = {}) {
     console.log("[microlink.call] serialized to ", [params_serialized, params_functions]);
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const id = Math.random();
     const listener = async function listener(evt) {
       if (debug_level >= 2) {
@@ -16,14 +16,16 @@ export default function call(it, method, params, { debug_level = 0 } = {}) {
       }
       let { data } = evt;
 
-      if (typeof data !== "object" || data === null) return;
+      if (typeof data !== "object" || data === null) {
+        return;
+      }
 
       // batch request
       if (Array.isArray(data) && data.length >= 1 && data[0].jsonrpc === "2.0" && data[0].method) {
         if (debug_level >= 2) console.log("[microlink.call] top thread received batch request");
         if (!params_functions) throw new Error("[microlink.call] no callable functions");
         // const times = []
-        let results = await Promise.all(
+        const results = await Promise.all(
           data.map(async req => {
             // if (!req.method) throw new Error("[Microlink.call] missing method");
             // if (!(req.method in params_functions)) throw new Error("[Microlink.call] invalid method");
@@ -35,14 +37,21 @@ export default function call(it, method, params, { debug_level = 0 } = {}) {
         return it.postMessage(results);
       }
 
-      if (data.jsonrpc !== "2.0") return;
+      if (data.jsonrpc !== "2.0") {
+        return;
+      }
 
       if (data.method && params_functions && data.method in params_functions) {
-        if (!Array.isArray(data.params)) throw Error("[microlink.call] params should be an array");
-        const result = await params_functions[data.method](...data.params);
-        const msg = { jsonrpc: "2.0", result, id: data.id };
-        if (debug_level >= 2) console.log("[microlink.call] posting message down to worker:", msg);
-        return it.postMessage(msg);
+        try {
+          if (!Array.isArray(data.params)) throw Error("[microlink.call] params should be an array");
+          const result = await params_functions[data.method](...data.params);
+          const msg = { jsonrpc: "2.0", result, id: data.id };
+          if (debug_level >= 2) console.log("[microlink.call] posting message down to worker:", msg);
+          return it.postMessage(msg);
+        } catch (error) {
+          console.error("[microlink.call] error:", error);
+          reject(error);
+        }
       }
 
       if (data.id === id) {

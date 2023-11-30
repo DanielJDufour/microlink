@@ -50,7 +50,7 @@ export default function expose(obj, options) {
         id
       });
     } catch (error) {
-      if (debug_level >= 2) console.error("[microlink.expose] error:", error);
+      console.error("[microlink.expose] error:", error);
       return postMessage({
         jsonrpc: "2.0",
         error: {
