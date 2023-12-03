@@ -6,6 +6,7 @@
 - built with [JSON-RPC 2.0](https://www.jsonrpc.org/specification)
 - zero run-time dependencies
 - batching
+- await promise in another thread
 
 ## usage
 #### inside worker.js
