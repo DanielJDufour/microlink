@@ -5,8 +5,8 @@
 - easily pass functions to worker threads
 - built with [JSON-RPC 2.0](https://www.jsonrpc.org/specification)
 - zero run-time dependencies
-- batching
 - await promise in another thread
+- batching
 
 ## usage
 #### inside worker.js
@@ -45,7 +45,6 @@ expose(methods, {
 })
 ```
 
-
 #### debugging
 ```js
 // pass an options object to expose or wrap
@@ -54,3 +53,4 @@ const options = { debug_level: 10 };
 expose(methods, options);
 wrap(worker, options)
 ```
+  

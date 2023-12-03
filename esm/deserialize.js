@@ -11,7 +11,7 @@ export default function deserialize(it, inpt, depth = 1, { batch_size = 1, batch
     } else {
       return inpt;
     }
-  } else if (typeof inpt === "object") {
+  } else if (typeof inpt === "object" && inpt !== null && inpt.constructor.name.indexOf("Array") === -1) {
     const obj = {};
     for (let key in inpt) {
       obj[key] = deserialize(it, inpt[key], depth - 1, { batch_size, batch_wait });

@@ -20,12 +20,13 @@ export default function serialize(things, { function_prefix = DEFAULT_FUNCTION_P
       const fid = generate_id(it);
       funcs[fid] = it;
       return function_prefix + fid;
-    } else if (typeof it === "object" && typeof it.then === "function") {
+    } else if (typeof it === "object" && it !== null && typeof it.then === "function") {
       const pid = generate_id(it);
       proms[pid] = it;
       funcs[pid] = () => it; // create function that returns the promise
       return promise_prefix + pid;
-    } else if (typeof it === "object") {
+    } else if (typeof it === "object" && it !== null && it.constructor.name.indexOf("Array") === -1) {
+      // object that is not null nor a typed array
       return Object.fromEntries(Object.entries(it).map(([k, v]) => [k, stringify(v)]));
     } else {
       return it;

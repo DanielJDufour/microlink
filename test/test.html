@@ -5,14 +5,14 @@
     <script>
       window.process = {
         env: {
-          // TEST_NAME: "sending promise result"
+          // TEST_NAME: "typed arrays"
         }
       };
     </script>
   </head>
   <body>
     <script type="module">
-      const { expose, wrap } = microlink;
+      const { expose, wrap, _serialize } = microlink;
 
       const worker_script = "http://localhost:8080/test/test.worker.js";
       // const worker_string = "data:text/javascript;base64," + btoa(worker_script);
@@ -69,11 +69,11 @@
             method: "microlink.list"
           });
         });
-        eq(response, { jsonrpc: "2.0", result: ["run", "math", "pow", "send_promise"], id: 1234 });
+        eq(response, { jsonrpc: "2.0", result: ["run", "math", "pow", "send_promise", "u8"], id: 1234 });
       });
 
       test("wrap", async ({ eq }) => {
-        eq(Object.keys(lnk).sort(), ["math", "pow", "run", "send_promise"]);
+        eq(Object.keys(lnk).sort(), ["math", "pow", "run", "send_promise", "u8"]);
         eq(await lnk.pow(2, 4), 16);
         eq(await lnk.math("sqrt", 4), 2);
       });
@@ -87,6 +87,25 @@
         const { promise } = await lnk.send_promise();
         console.log({ promise });
         eq(await promise, 42);
+      });
+
+      test("serialize typed arrays", async ({ eq }) => {
+        const u8 = Uint8Array.from([1, 2, 3, 4]);
+        const u16 = Uint16Array.from([5, 6, 7, 8]);
+        const result = {
+          data: [u8, u16]
+        };
+        const prom = Promise.resolve(result);
+        const [serialized, funcs, proms] = _serialize(prom, { promise_prefix: "p:" }, () => "RANDOM_ID");
+        eq(serialized, "p:RANDOM_ID");
+        eq(proms, { RANDOM_ID: prom });
+        eq(await funcs.RANDOM_ID(), result);
+      });
+
+      test("typed arrays", async ({ eq }) => {
+        const { data } = await lnk.u8();
+        eq(data[0].constructor.name, "Uint8Array");
+        eq(data[1].constructor.name, "Uint16Array");
       });
     </script>
   </body>

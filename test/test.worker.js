@@ -11,7 +11,12 @@ expose(
     },
     send_promise: () => {
       return { promise: Promise.resolve(42) };
+    },
+    u8: () => {
+      return Promise.resolve({
+        data: [Uint8Array.from([1, 2, 3, 4]), Uint16Array.from([5, 6, 7, 8])]
+      });
     }
   },
-  { debug_level: 0 }
+  { debug_level: 10 }
 );

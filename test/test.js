@@ -121,6 +121,54 @@ test("serialize nested promise", async ({ eq }) => {
   eq(await funcs.ID(), 42);
 });
 
+test("serialize typed arrays", ({ eq }) => {
+  const u8 = Uint8Array.from([1, 2, 3, 4]);
+  const u16 = Uint16Array.from([5, 6, 7, 8]);
+  const result = {
+    data: [u8, u16]
+  };
+  const serialized = serialize(result);
+  eq(serialized, [result, {}, {}]);
+});
+
+test("deserialize typed arrays", ({ eq }) => {
+  const u8 = Uint8Array.from([1, 2, 3, 4]);
+  const u16 = Uint16Array.from([5, 6, 7, 8]);
+  const result = {
+    data: [u8, u16]
+  };
+  const deserialized = deserialize({}, result);
+  eq(deserialized, result);
+});
+
+test("deserialize null", ({ eq }) => {
+  const it = {};
+  eq(deserialize(it, null), null);
+  eq(deserialize(it, [null]), [null]);
+  eq(deserialize(it, { k: null }), { k: null });
+  eq(deserialize(it, [{ k: null }]), [{ k: null }]);
+});
+
+test("serialize null", async ({ eq }) => {
+  eq(serialize(null), [null, {}, {}]);
+  eq(serialize([null]), [[null], {}, {}]);
+  eq(serialize({ k: null }), [{ k: null }, {}, {}]);
+  eq(serialize([{ k: null }]), [[{ k: null }], {}, {}]);
+});
+
+test("serialize promise of typed arrays", async ({ eq }) => {
+  const u8 = Uint8Array.from([1, 2, 3, 4]);
+  const u16 = Uint16Array.from([5, 6, 7, 8]);
+  const result = {
+    data: [u8, u16]
+  };
+  const prom = Promise.resolve(result);
+  const [serialized, funcs, proms] = serialize(prom, { promise_prefix: "p:" }, () => "RANDOM_ID");
+  eq(serialized, "p:RANDOM_ID");
+  eq(proms, { RANDOM_ID: prom });
+  eq(await funcs.RANDOM_ID(), result);
+});
+
 test("call", async ({ eq }) => {
   const onload = ({ self }) => {
     self.onmessage = evt => {
