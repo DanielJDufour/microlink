@@ -1,22 +1,32 @@
+import { DEFAULT_FUNCTION_PREFIX, DEFAULT_PROMISE_PREFIX } from "./enums.js";
+
 /**
  * @name serialize
- * @description convert functions at any level of nesting to strings
+ * @description convert functions and promises at any level of nesting to strings
  * @param {any} it
  * @param {String} prefix - add to beginning of function ids
  * @returns [it, funcs]
  */
-export default function serialize(things, prefix = "func:") {
+export default function serialize(things, { function_prefix = DEFAULT_FUNCTION_PREFIX, promise_prefix = DEFAULT_PROMISE_PREFIX } = {}, generate_id) {
   const funcs = {};
+  const proms = {};
+
+  if (!generate_id) generate_id = () => Math.random();
 
   function stringify(it) {
     if (Array.isArray(it)) {
       return it.map(i => stringify(i));
+    } else if (typeof it === "function") {
+      const fid = generate_id(it);
+      funcs[fid] = it;
+      return function_prefix + fid;
+    } else if (typeof it === "object" && typeof it.then === "function") {
+      const pid = generate_id(it);
+      proms[pid] = it;
+      funcs[pid] = () => it; // create function that returns the promise
+      return promise_prefix + pid;
     } else if (typeof it === "object") {
       return Object.fromEntries(Object.entries(it).map(([k, v]) => [k, stringify(v)]));
-    } else if (typeof it === "function") {
-      const fid = Math.random();
-      funcs[fid] = it;
-      return prefix + fid;
     } else {
       return it;
     }
@@ -24,5 +34,5 @@ export default function serialize(things, prefix = "func:") {
 
   things = stringify(things);
 
-  return [things, funcs];
+  return [things, funcs, proms];
 }

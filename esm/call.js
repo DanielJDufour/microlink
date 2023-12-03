@@ -1,9 +1,10 @@
 import serialize from "./serialize.js";
+import deserialize from "./deserialize.js";
 
 export default function call(it, method, params, { debug_level = 0 } = {}) {
   if (!params) params = [];
 
-  let [params_serialized, params_functions] = serialize(params, "microlink.call:");
+  let [params_serialized, params_functions] = serialize(params);
   if (debug_level >= 2) {
     console.log("[microlink.call] serialized to ", [params_serialized, params_functions]);
   }
@@ -61,7 +62,12 @@ export default function call(it, method, params, { debug_level = 0 } = {}) {
         // even if promise is used later
         params_functions = null;
 
-        resolve(data.result);
+        const result = deserialize(it, data.result);
+        if (debug_level >= 2) {
+          console.log("[microlink.call] deserialized", data.result, "to", result);
+        }
+
+        resolve(result);
       }
     };
     it.addEventListener("message", listener);

@@ -2,6 +2,13 @@
   <head>
     <script src="https://unpkg.com/flug"></script>
     <script src="http://localhost:8080/dist/microlink.bundle.js"></script>
+    <script>
+      window.process = {
+        env: {
+          // TEST_NAME: "sending promise result"
+        }
+      };
+    </script>
   </head>
   <body>
     <script type="module">
@@ -37,7 +44,7 @@
             method: "UNKNOWN_METHOD_NAME"
           });
         });
-        eq(response, { jsonrpc: "2.0", error: { code: -32601, message: "Method not found" }, id: 1234 });
+        eq(response, { jsonrpc: "2.0", error: { code: -32601, message: "Method not found", data: { method: "UNKNOWN_METHOD_NAME" } }, id: 1234 });
       });
 
       test("error", async ({ eq }) => {
@@ -50,7 +57,7 @@
             params: [2, undefined]
           });
         });
-        eq(response, { jsonrpc: "2.0", error: { code: -32603, message: "Internal error" }, id: 1234 });
+        eq(response, { jsonrpc: "2.0", error: { code: -32603, message: "Internal error", data: { error: "exp is undefined" } }, id: 1234 });
       });
 
       test("list", async ({ eq }) => {
@@ -62,11 +69,11 @@
             method: "microlink.list"
           });
         });
-        eq(response, { jsonrpc: "2.0", result: ["run", "math", "pow"], id: 1234 });
+        eq(response, { jsonrpc: "2.0", result: ["run", "math", "pow", "send_promise"], id: 1234 });
       });
 
       test("wrap", async ({ eq }) => {
-        eq(Object.keys(lnk).sort(), ["math", "pow", "run"]);
+        eq(Object.keys(lnk).sort(), ["math", "pow", "run", "send_promise"]);
         eq(await lnk.pow(2, 4), 16);
         eq(await lnk.math("sqrt", 4), 2);
       });
@@ -74,6 +81,12 @@
       test("passing in function", async ({ eq }) => {
         const response = await lnk.run(() => 987654321);
         eq(response, 987654321);
+      });
+
+      test("sending promise result", async ({ eq }) => {
+        const { promise } = await lnk.send_promise();
+        console.log({ promise });
+        eq(await promise, 42);
       });
     </script>
   </body>

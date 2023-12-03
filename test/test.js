@@ -49,12 +49,12 @@ test("chunk", ({ eq }) => {
 test("deserialize", async ({ eq }) => {
   eq(deserialize({}, [1, 2]), [1, 2]);
 
-  const result1 = deserialize({}, ["microlink.call:hello", 2]);
+  const result1 = deserialize({}, ["microlink.function:hello", 2]);
   eq(Array.isArray(result1), true);
   eq(typeof result1[0], "function");
   eq(
     result1.map(it => it.toString()),
-    ["function () {\n      return runInBatch({ method, params: Array.from(arguments) });\n    }", "2"]
+    ["function () {\n      const params = Array.from(arguments);\n      return runInBatch({ method, params });\n    }", "2"]
   );
 
   let listener;
@@ -66,9 +66,9 @@ test("deserialize", async ({ eq }) => {
   };
   const batch_size = 3;
   const batch_wait = 100;
-  const result2 = deserialize(tracker, [{ expr: "microlink.call:expr" }], 0, { batch_size, batch_wait });
+  const result2 = deserialize(tracker, [{ expr: "microlink.function:expr" }], 0, { batch_size, batch_wait });
   eq(typeof result2[0].expr, "function");
-  eq(result2[0].expr.toString(), "function () {\n      return runInBatch({ method, params: Array.from(arguments) });\n    }");
+  eq(result2[0].expr.toString(), "function () {\n      const params = Array.from(arguments);\n      return runInBatch({ method, params });\n    }");
   const p1 = result2[0].expr([123]);
   const p2 = result2[0].expr([456]);
   const p3 = result2[0].expr([789]);
@@ -92,14 +92,33 @@ test("deserialize", async ({ eq }) => {
 });
 
 test("serialize", async ({ eq }) => {
-  eq(serialize([1, 2], "prefix:"), [[1, 2], {}]);
-  const params1 = [{ f: () => {} }, 1];
-  const [result1, handlers1] = serialize(params1, "prefix:");
-  eq(typeof result1[0].f, "string");
-  eq(result1[0].f.startsWith("prefix:"), true);
-  eq(typeof result1[1], "number");
-  eq(Object.keys(handlers1)[0].startsWith("prefix:"), false);
-  eq(Object.keys(handlers1).length, 1);
+  const f = () => {};
+  eq(
+    serialize([1, 2], {}, () => "FID"),
+    [[1, 2], {}, {}]
+  );
+  eq(
+    serialize([{ f }, 1], { function_prefix: "prefix:" }, () => "FID"),
+    [[{ f: "prefix:FID" }, 1], { FID: f }, {}]
+  );
+});
+
+test("serialize top-level promise", async ({ eq }) => {
+  const p = Promise.resolve(42);
+  const [serialized, params] = serialize(p, { promise_prefix: "p:" }, () => "ID");
+  eq(serialized, "p:ID");
+  eq(typeof params.ID, "function");
+  eq(typeof params.ID().then, "function");
+  eq(await params.ID(), 42);
+});
+
+test("serialize nested promise", async ({ eq }) => {
+  const p = Promise.resolve(42);
+  const results = serialize([{ p }], { promise_prefix: "p:" }, () => "ID");
+  eq(results.length, 3);
+  const [serialized, funcs] = results;
+  eq(serialized, [{ p: "p:ID" }]);
+  eq(await funcs.ID(), 42);
 });
 
 test("call", async ({ eq }) => {

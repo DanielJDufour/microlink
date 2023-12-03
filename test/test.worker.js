@@ -1,5 +1,5 @@
 import expose from "http://localhost:8080/esm/expose.js";
-import wrap from "http://localhost:8080/esm/wrap.js";
+// import wrap from "http://localhost:8080/esm/wrap.js";
 
 expose(
   {
@@ -8,6 +8,9 @@ expose(
     pow: (base, exp) => {
       if (exp === undefined) throw Error("exp is undefined");
       return Math.pow(base, exp);
+    },
+    send_promise: () => {
+      return { promise: Promise.resolve(42) };
     }
   },
   { debug_level: 0 }
