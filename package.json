@@ -1,6 +1,6 @@
 {
   "name": "microlink",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Comlink Alternative. Built with JSON-RPC.",
   "unpkg": "./dist/microlink.bundle.js",
   "jsdelivr": "./dist/microlink.bundle.js",
